@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Practical Understanding - Learner's Guide</title>
+    <style>
+        :root {
+            --primary: #14F195;
+            --secondary: #00D4AA;
+            --dark-bg: #0B1317;
+            --card-bg: #111827;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --border: #1F2937;
+            --accent1: #EC4899;
+            --accent2: #8B5CF6;
+            --success: #10B981;
+            --error: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0B1317 0%, #1a1f2e 100%);
+            border-bottom: 2px solid var(--primary);
+            padding: 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(20, 241, 149, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 0;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        nav h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav a {
+            display: block;
+            padding: 0.6rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+            border-left-color: var(--primary);
+            background: rgba(20, 241, 149, 0.1);
+        }
+
+        nav a.active {
+            color: var(--primary);
+            border-left-color: var(--primary);
+            background: rgba(20, 241, 149, 0.15);
+            font-weight: 600;
+        }
+
+        main {
+            padding: 3rem;
+            max-width: 1000px;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 120px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: var(--secondary);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .box {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .box.info {
+            border-left-color: var(--secondary);
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        .box.success {
+            border-left-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .box.warning {
+            border-left-color: var(--accent1);
+            background: rgba(236, 72, 153, 0.05);
+        }
+
+        pre {
+            background: #0a0e13;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--primary);
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: rgba(20, 241, 149, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+            color: var(--primary);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: linear-gradient(90deg, rgba(20, 241, 149, 0.2), rgba(0, 212, 170, 0.2));
+            padding: 1rem;
+            text-align: left;
+            color: var(--primary);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(20, 241, 149, 0.05);
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .comparison-item h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .comparison-item ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .comparison-item li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.6rem;
+        }
+
+        .comparison-item li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+        }
+
+        .diagram {
+            background: #0a0e13;
+            border: 2px dashed var(--secondary);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            overflow-x: auto;
+            color: var(--secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .checklist {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0;
+            color: var(--text-primary);
+        }
+
+        .checklist-item input {
+            margin-right: 1rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .toc {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0.5rem;
+        }
+
+        .toc h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .toc ol {
+            margin-bottom: 0;
+        }
+
+        .toc a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                display: none;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚀 Solana Practical Understanding</h1>
+        <p>A Learner-Friendly Guide to Solana Development</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <h3>📚 Guide Sections</h3>
+            <a href="#programs" onclick="updateNav(event)">What Are Programs?</a>
+            <a href="#accounts" onclick="updateNav(event)">Accounts & State</a>
+            <a href="#cpi" onclick="updateNav(event)">CPI</a>
+            <a href="#upgradeable" onclick="updateNav(event)">Upgradeable Programs</a>
+            <a href="#sol-vs-spl" onclick="updateNav(event)">SOL vs SPL</a>
+            <a href="#mint" onclick="updateNav(event)">Mint & Authorities</a>
+            <a href="#examples" onclick="updateNav(event)">Examples</a>
+            <a href="#comparisons" onclick="updateNav(event)">Comparisons</a>
+            <a href="#confusions" onclick="updateNav(event)">FAQs & Confusions</a>
+            <a href="#glossary" onclick="updateNav(event)">Glossary</a>
+            <a href="#recap" onclick="updateNav(event)">Top 10 Things</a>
+        </nav>
+
+        <main>
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3>📖 Quick Navigation</h3>
+                <ol>
+                    <li><a href="#programs">What Are Solana Programs?</a></li>
+                    <li><a href="#accounts">Accounts and State Storage</a></li>
+                    <li><a href="#cpi">Cross-Program Invocation (CPI)</a></li>
+                    <li><a href="#upgradeable">Upgradeable Programs</a></li>
+                    <li><a href="#sol-vs-spl">SOL vs SPL Tokens</a></li>
+                    <li><a href="#mint">Mint and Authorities</a></li>
+                    <li><a href="#examples">End-to-End Examples</a></li>
+                    <li><a href="#comparisons">Comparison Tables</a></li>
+                    <li><a href="#confusions">Common Confusions and FAQs</a></li>
+                    <li><a href="#glossary">Glossary</a></li>
+                    <li><a href="#recap">Top 10 Things to Remember</a></li>
+                </ol>
+            </div>
+
+            <!-- What Are Programs -->
+            <section id="programs">
+                <h2>🔧 What Are Solana Programs?</h2>
+
+                <h3>Layman's Explanation</h3>
+                <p><strong>Think of a Solana program like a vending machine:</strong></p>
+
+                <pre><div class="diagram">Normal app (Ethereum):
+├─ Code runs on a single server
+├─ Server stores data
+└─ Works 24/7 (unless server crashes)
+
+Solana Program:
+├─ Code runs on thousands of validators
+├─ Validators execute identical code
+├─ Network stores data (not one server)
+└─ Anyone can trigger program execution</div></pre>
+
+                <h3>Technical Definition</h3>
+                <div class="box info">
+                    <strong>A Solana program is:</strong>
+                    <ul>
+                        <li>Smart contract code compiled to BPF bytecode</li>
+                        <li>Deployed on validators</li>
+                        <li>Stateless (no internal storage)</li>
+                        <li>Invoked by transactions</li>
+                        <li>Receives accounts as parameters</li>
+                        <li>Modifies accounts based on logic</li>
+                    </ul>
+                </div>
+
+                <h3>Programs vs Traditional Apps</h3>
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Traditional App</th>
+                        <th>Solana Program</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Where it runs</strong></td>
+                        <td>One server</td>
+                        <td>All validators</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code language</strong></td>
+                        <td>JavaScript, Python, etc</td>
+                        <td>Rust, C, etc</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data storage</strong></td>
+                        <td>Database</td>
+                        <td>Blockchain accounts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Invocation</strong></td>
+                        <td>HTTP request</td>
+                        <td>Transaction instruction</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Execution model</strong></td>
+                        <td>Stateful</td>
+                        <td>Stateless</td>
+                    </tr>
+                </table>
+
+                <h3>Program Types</h3>
+                <pre><div class="diagram">System Program
+├─ Built-in program
+├─ Purpose: Create accounts, transfer SOL
+└─ ID: 11111111111111111111111111111111
+
+Token Program
+├─ Built-in program
+├─ Purpose: Manage tokens
+└─ ID: TokenkegQfeZyiNwAJsyFbPVwwQQftas5EMQQqJL8Aw
+
+Metadata Program
+├─ Utility program
+├─ Purpose: Store NFT metadata
+└─ ID: metaqbxxUerdq8d4vs6G7Ux19x6amv2xzy...
+
+Custom Programs
+├─ Built by developers
+├─ Purpose: Specific business logic (payments, DEX, etc)
+└─ Deployed by developers</div></pre>
+            </section>
+
+            <!-- Accounts and State -->
+            <section id="accounts">
+                <h2>💾 Accounts and State Storage</h2>
+
+                <h3>Where State Lives</h3>
+                <p><strong>Unlike Ethereum, programs don't store state.</strong></p>
+
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <h4>Ethereum</h4>
+                        <pre><div class="diagram">Program Storage:
+├─ mapping(addr => bal)
+├─ mapping(addr => app)
+└─ (built-in)</div></pre>
+                    </div>
+                    <div class="comparison-item">
+                        <h4>Solana</h4>
+                        <pre><div class="diagram">Program (Stateless):
+├─ Just code
+└─ No storage
+
+State Storage:
+├─ Separate accounts
+├─ Each account = data
+├─ Program modifies
+└─ Accounts pay rent</div></pre>
+                    </div>
+                </div>
+
+                <h3>Account as Data Container</h3>
+                <pre><div class="diagram">Account Structure:
+
+Account #1 (User Balance)
+├─ Owner: Token Program
+├─ Lamports: 2000 (rent)
+├─ Data:
+│  ├─ mint: token_addr
+│  ├─ owner: alice_addr
+│  ├─ amount: 100 tokens
+│  └─ delegate: none
+└─ Executable: false
+
+Account #2 (Program Code)
+├─ Owner: BPF Loader
+├─ Lamports: enough for rent
+├─ Data: compiled bytecode
+└─ Executable: true</div></pre>
+
+                <h3>Account Ownership</h3>
+                <div class="box success">
+                    <strong>Rule: Only the account's owner can modify its data</strong>
+                    <pre><div class="diagram">Example:
+├─ Token Account
+│  ├─ Owner: Token Program
+│  └─ ONLY: Token Program can modify balance
+├─ NFT Metadata
+│  ├─ Owner: Metadata Program
+│  └─ ONLY: Metadata Program can update
+└─ User Data
+   ├─ Owner: Custom Program
+   └─ ONLY: Custom Program can update</div></pre>
+                </div>
+
+                <h3>Rent and Storage Costs</h3>
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Details</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage Cost</strong></td>
+                        <td>19.1 lamports per byte per year</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Account (128 bytes)</strong></td>
+                        <td>Annual: 2,444 lamports; 2-year: 4,888 lamports</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rent Exemption</strong></td>
+                        <td>Balance ≥ 2 years rent = never pay rent</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Who pays?</strong></td>
+                        <td>Transaction executor (usually account creator)</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- CPI -->
+            <section id="cpi">
+                <h2>🔗 Cross-Program Invocation (CPI)</h2>
+
+                <h3>What is CPI?</h3>
+                <div class="box info">
+                    <strong>CPI = One program calling another program</strong>
+                </div>
+
+                <h3>Real-World Analogy</h3>
+                <pre><div class="diagram">Scenario: You want to swap tokens on DEX
+
+Without CPI:
+├─ You call Token Program
+├─ You manually specify all accounts
+├─ You call DEX Program
+├─ DEX calls Token Program again
+└─ Redundant, inefficient
+
+With CPI:
+├─ DEX Program uses CPI
+├─ Calls Token Program directly
+├─ Passes proper accounts
+└─ Atomic: All succeed or all fail</div></pre>
+
+                <h3>How CPI Works</h3>
+                <pre><div class="diagram">Timeline:
+
+Your Transaction:
+├─ Calls DEX Program
+├─ DEX Program executes:
+│  ├─ Validation
+│  ├─ Use CPI → call Token Program
+│  │  ├─ Pass: alice_token, bob_token
+│  │  ├─ Token Program modifies
+│  │  └─ Return to DEX
+│  ├─ More logic
+│  └─ Return success
+
+Result:
+├─ All changes atomic
+├─ Two programs executed
+└─ Efficient state changes</div></pre>
+
+                <h3>Program Derived Signers</h3>
+                <div class="box warning">
+                    <strong>Problem:</strong> Only wallets have private keys to sign
+                </div>
+
+                <pre><div class="diagram">CPI Solution: PDA (Program Derived Address)
+
+PDA Characteristics:
+├─ No private key
+├─ Only program can authorize
+├─ Deterministic (same inputs = same addr)
+└─ Used as: program authority
+
+Example (DEX Vault):
+
+Vault PDA:
+├─ Seeds: ["vault", token_mint]
+├─ Owner: DEX Program
+├─ Holds: Liquidity for swaps
+└─ ONLY: DEX can authorize use
+
+When swapping:
+├─ DEX can "sign" for vault PDA
+├─ Vault transfers tokens
+└─ ONLY: DEX logic decides what</div></pre>
+            </section>
+
+            <!-- Upgradeable Programs -->
+            <section id="upgradeable">
+                <h2>🔄 Upgradeable Programs</h2>
+
+                <h3>Two Types of Programs</h3>
+                <pre><div class="diagram">Immutable Program:
+├─ Deployed and fixed
+├─ No updates ever
+├─ Burn after deploying
+└─ Example: Protocol guaranteed never to change
+
+Upgradeable Program:
+├─ Deployed with upgrade authority
+├─ Can be updated by authority
+├─ Authority can be transferred
+└─ Authority can be revoked (make immutable)</div></pre>
+
+                <h3>How Upgradeable Programs Work</h3>
+                <pre><div class="diagram">Structure:
+
+Proxy Account (the actual "Program ID"):
+├─ Owner: BPF Loader (Upgradeable)
+├─ Data: Pointer to implementation
+└─ Does NOT contain code
+
+Implementation Account (actual code):
+├─ Owner: BPF Loader (Upgradeable)
+├─ Data: Program bytecode
+└─ Contains actual logic
+
+Upgrade Authority:
+├─ Can: Point proxy to new implementation
+└─ Can: Set new authority or revoke
+
+
+Upgrade Flow:
+
+1. Deploy v1 implementation
+2. Point proxy to v1
+3. Users call proxy
+
+4. Deploy v2 implementation
+5. Update authority updates proxy → v2
+6. Users call proxy (same address!)
+7. Proxy executes v2 code
+
+Result:
+├─ Program ID stays same
+├─ Code can change
+└─ Seamless upgrade</div></pre>
+
+                <h3>Risks</h3>
+                <div class="box">
+                    <strong>Mutable Programs:</strong>
+                    <ul>
+                        <li>Developers can rug (steal funds)</li>
+                        <li>Code can be exploited via update</li>
+                        <li>Trust developer/DAO</li>
+                    </ul>
+                </div>
+                <div class="box success">
+                    <strong>Immutable Programs:</strong>
+                    <ul>
+                        <li>100% safe code (cannot change)</li>
+                        <li>Bugs cannot be fixed</li>
+                        <li>More trust from users</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SOL vs SPL -->
+            <section id="sol-vs-spl">
+                <h2>💰 SOL vs SPL Tokens</h2>
+
+                <h3>SOL: Native Currency</h3>
+                <pre><div class="diagram">SOL (Solana's native token):
+├─ Built-in to protocol
+├─ Allocated by System Program
+├─ Transferred natively
+├─ Used for: fees, rent, staking
+└─ 1 SOL = 1 billion lamports
+
+Account with SOL:
+├─ account.lamports contains balance
+└─ No Token Program needed
+
+Example (5 SOL):
+├─ lamports = 5,000,000,000
+└─ 5 × 10^9</div></pre>
+
+                <h3>SPL Tokens: Custom Tokens</h3>
+                <pre><div class="diagram">SPL (Solana Program Library):
+├─ Implemented by Token Program
+├─ Similar to ERC-20
+├─ Arbitrary supply
+├─ Custom properties
+└─ Examples: USDC, Cope, wBTC
+
+Account with SPL Token:
+├─ Owned by Token Program
+├─ account.data contains info
+├─ Balance stored in data
+└─ Need ATA per person
+
+Example (100 USDC):
+├─ account.owner = Token Program
+├─ account.data:
+│  ├─ mint: USDC address
+│  ├─ owner: your wallet
+│  ├─ amount: 100,000,000 (6 decimals)
+│  └─ ...other fields</div></pre>
+
+                <h3>Comparison</h3>
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>SOL</th>
+                        <th>SPL Token</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage</strong></td>
+                        <td>account.lamports</td>
+                        <td>account.data</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Program</strong></td>
+                        <td>System Program (built-in)</td>
+                        <td>Token Program</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transfer</strong></td>
+                        <td>System Program instruction</td>
+                        <td>Token Program instruction</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Decimals</strong></td>
+                        <td>9 (1 SOL = 1B lamports)</td>
+                        <td>Variable (USDC = 6)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mint</strong></td>
+                        <td>Built-in (fixed)</td>
+                        <td>Configurable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Freezing</strong></td>
+                        <td>Not possible</td>
+                        <td>Possible</td>
+                    </tr>
+                </table>
+
+                <h3>Why SPL Tokens?</h3>
+                <div class="box">
+                    <h4>Use Cases:</h4>
+                    <ul>
+                        <li>Stablecoins (USDC, USDT)</li>
+                        <li>Project tokens (Cope, RAY)</li>
+                        <li>NFTs (each is unique SPL token)</li>
+                        <li>Utility tokens</li>
+                        <li>Wrapped tokens (Wrapped Bitcoin)</li>
+                    </ul>
+                    <h4>Benefits:</h4>
+                    <ul>
+                        <li>Flexible supply</li>
+                        <li>Custom rules (freeze, burn)</li>
+                        <li>Multiple tokens, one standard</li>
+                        <li>Composable (DEX, lending, etc)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Mint and Authorities -->
+            <section id="mint">
+                <h2>🪙 Mint and Authorities</h2>
+
+                <h3>What is a Mint?</h3>
+                <p><strong>A Mint is the definition of a token.</strong></p>
+
+                <pre><div class="diagram">Mint Account:
+├─ Owner: Token Program
+├─ Data:
+│  ├─ supply (total issued)
+│  ├─ decimals (6 for USDC)
+│  ├─ mint_authority (who can create)
+│  ├─ freeze_authority (who can freeze)
+│  └─ is_initialized (true)
+└─ Writable: Only by Token Program
+
+Example (USDC Mint):
+├─ supply: 43,000,000,000 USDC
+├─ decimals: 6
+├─ mint_authority: Circle (can issue)
+├─ freeze_authority: Circle (can freeze)
+└─ address: EPjFWaJy47gIdJtiEunGoMaxuS1yGqjNzSZThLgMjNj</div></pre>
+
+                <h3>Mint Authority</h3>
+                <div class="box">
+                    <strong>What it does:</strong>
+                    <ul>
+                        <li>Can create (mint) new tokens</li>
+                        <li>Increases total supply</li>
+                    </ul>
+
+                    <strong>Example process:</strong>
+                    <ol>
+                        <li>Circle (mint authority) issues 1M USDC</li>
+                        <li>Token Program creates tokens</li>
+                        <li>supply: 42B → 42.001B USDC</li>
+                        <li>Tokens sent to Circle's account</li>
+                    </ol>
+
+                    <strong>Risks:</strong>
+                    <ul>
+                        <li>If private key leaked: unlimited inflation</li>
+                        <li>If revoked: no more tokens can be minted</li>
+                        <li>Usually: Centralized authority</li>
+                    </ul>
+                </div>
+
+                <h3>Freeze Authority</h3>
+                <div class="box info">
+                    <strong>What it does:</strong>
+                    <ul>
+                        <li>Can freeze (lock) token accounts</li>
+                        <li>Frozen account: cannot transfer</li>
+                        <li>Can unfreeze</li>
+                    </ul>
+
+                    <strong>Use cases:</strong>
+                    <ul>
+                        <li>Compliance (freeze sanctioned accounts)</li>
+                        <li>Cooling-off periods</li>
+                        <li>Security (temporarily freeze if hacked)</li>
+                        <li>Custom logic</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Examples -->
+            <section id="examples">
+                <h2>📋 End-to-End Examples</h2>
+
+                <h3>Example 1: Transfer SOL from Alice to Bob</h3>
+                <p><strong>Scenario:</strong> Alice sends 5 SOL to Bob</p>
+
+                <h4>ASCII Diagram: Seed to Address</h4>
+                <pre><div class="diagram">ALICE'S WALLET:
+
+seed phrase:
+"abandon ability able about above absent..."
+        ↓
+    (BIP39)
+        ↓
+  master seed
+ (64 bytes)
+        ↓
+   (BIP44)
+        ↓
+private key
+(32 bytes)
+ [secret!]
+        ↓
+  (Ed25519)
+        ↓
+public key
+(32 bytes)
+        ↓
+[Base58]
+        ↓
+   Address
+"8e74fbE1NHhbw6X9DQ2wE6WbH7NvqvJ2..."</div></pre>
+
+                <h4>Step-by-Step: SOL Transfer</h4>
+                <pre><div class="diagram">BEFORE:
+├─ Alice: 10 SOL
+└─ Bob: 2 SOL
+
+STEP 1: Alice creates transaction
+├─ TO: System Program
+├─ Accounts: [alice, bob]
+├─ Instruction: Transfer 5 SOL
+└─ Amount: 5,000,000,000 lamports
+
+STEP 2: Sign transaction
+├─ Serialize message
+├─ Sign with Alice's private key
+└─ Get 64-byte signature
+
+STEP 3: Submit to network
+├─ Send to RPC node
+├─ Broadcast to network
+└─ Enter mempool
+
+STEP 4: Leader includes in block
+├─ Order: Put with other transactions
+├─ Leader creates block
+└─ Broadcast via Turbine
+
+STEP 5: Execution (Sealevel)
+├─ Load Alice's account (10 SOL)
+├─ Verify Alice has ≥ 5 SOL? YES
+├─ Alice: 10 - 5 - 0.000005 = 4.999995
+├─ Bob: 2 + 5 = 7 SOL
+└─ Write accounts to ledger
+
+STEP 6: Validation (Tower BFT)
+├─ Validators verify block
+├─ Vote for block
+└─ Accumulate votes
+
+STEP 7: Finality (~6.4 seconds)
+├─ 2/3+ of validators voted
+└─ ✓ Transaction final
+
+AFTER:
+├─ Alice: 4.999995 SOL
+└─ Bob: 7 SOL</div></pre>
+
+                <h3>Example 2: Durable Nonce for Delayed Signing</h3>
+                <p><strong>Scenario:</strong> Alice wants to transfer 100 USDC in 1 hour but will sign now.</p>
+
+                <h4>ASCII Diagram: Durable Nonce Flow</h4>
+                <pre><div class="diagram">ALICE'S WORKFLOW:
+
+HOUR 0 (NOW):
+├─ Alice: "Send USDC in 1 hour"
+├─ Alice creates NONCE ACCOUNT
+│  ├─ Allocates new account
+│  ├─ Funds with 5000 lamports
+│  ├─ Initial nonce_value: 0x1a2b3c...
+│  └─ Authority: Alice
+│
+├─ Alice creates TRANSACTION:
+│  ├─ Accounts: [from, to, nonce, program]
+│  ├─ Amount: 100 USDC
+│  ├─ Uses: nonce_value = 0x1a2b3c...
+│  └─ NO expiration!
+│
+├─ Alice SIGNS transaction
+│  ├─ Serialize with nonce_value
+│  ├─ Sign with private key
+│  └─ Get signature
+│
+└─ Saves transaction file
+
+
+HOUR 1 (LATER):
+├─ Alice retrieves saved transaction
+├─ Submits to network
+│  ├─ Blockchain reads nonce_value
+│  ├─ Checks: Is nonce still 0x1a2b3c...?
+│  ├─ YES: Transaction accepted!
+│  └─ Nonce updated to 0x4d5e6f...
+│
+├─ Validator executes:
+│  ├─ Transfers 100 USDC
+│  ├─ Advances nonce_value
+│  └─ Writes to ledger
+│
+└─ ✓ Success
+
+
+IF ATTEMPTED 2ND TIME:
+├─ Alice tries to resubmit same TX
+├─ Blockchain checks nonce_value
+├─ Nonce is now 0x4d5e6f... (NOT 0x1a2b3c...)
+└─ ✗ REJECTED (replay protection!)</div></pre>
+
+                <h4>Why This Works</h4>
+                <pre><div class="diagram">Recent Blockhash (time-limited):
+├─ Valid for: 2-3 minutes
+├─ Cost: Free
+├─ Use case: Normal immediate transactions
+└─ Problem: Can't do delayed signing
+
+Durable Nonce (time-unlimited):
+├─ Valid for: Forever (until used)
+├─ Cost: 5000 lamports for account
+├─ Use case: Waiting to sign
+└─ Solution: Sign now, submit later!</div></pre>
+            </section>
+
+            <!-- Comparisons -->
+            <section id="comparisons">
+                <h2>📊 Comparison Tables</h2>
+
+                <h3>Solana vs Bitcoin vs Ethereum</h3>
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Bitcoin</th>
+                        <th>Ethereum</th>
+                        <th>Solana</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Year</strong></td>
+                        <td>2009</td>
+                        <td>2015</td>
+                        <td>2020</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TPS</strong></td>
+                        <td>~7</td>
+                        <td>~15</td>
+                        <td>400-1000+</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Avg Fee</strong></td>
+                        <td>$0.50-$5</td>
+                        <td>$2-$100</td>
+                        <td>$0.000003</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Finality</strong></td>
+                        <td>~10 min</td>
+                        <td>~15 sec</td>
+                        <td>~6.4 sec</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Block time</strong></td>
+                        <td>10 min</td>
+                        <td>12-14 sec</td>
+                        <td>400ms slots</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Consensus</strong></td>
+                        <td>Proof of Work</td>
+                        <td>Proof of Stake</td>
+                        <td>Proof of Stake</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Energy</strong></td>
+                        <td>Massive</td>
+                        <td>Low</td>
+                        <td>Very Low</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Language</strong></td>
+                        <td>C++</td>
+                        <td>Solidity</td>
+                        <td>Rust (primarily)</td>
+                    </tr>
+                </table>
+
+                <h3>SOL vs SPL Tokens</h3>
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>SOL</th>
+                        <th>SPL Token</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Implementation</strong></td>
+                        <td>Built-in</td>
+                        <td>Token Program</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage</strong></td>
+                        <td>account.lamports</td>
+                        <td>account.data</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Decimals</strong></td>
+                        <td>9 (fixed)</td>
+                        <td>Configurable (6 for USDC)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transfer</strong></td>
+                        <td>System Program</td>
+                        <td>Token Program</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mint</strong></td>
+                        <td>Fixed (not mintable)</td>
+                        <td>Configurable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Freezing</strong></td>
+                        <td>Not possible</td>
+                        <td>Possible</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- FAQs -->
+            <section id="confusions">
+                <h2>❓ Common Confusions and FAQs</h2>
+
+                <h3>❌ "Programs store state, right?"</h3>
+                <div class="box warning">
+                    <strong>WRONG</strong>
+                    <p>Programs are stateless. They don't store data. Accounts store data.</p>
+                    <pre><div class="diagram">Ethereum: mapping → stored in contract
+Solana: accounts → passed in transaction</div></pre>
+                </div>
+
+                <h3>❌ "Each program has one account?"</h3>
+                <div class="box warning">
+                    <strong>WRONG</strong>
+                    <p>Programs can have multiple data accounts. Each account = separate state.</p>
+                </div>
+
+                <h3>✓ "I can use the same program ID for different tokens?"</h3>
+                <div class="box success">
+                    <strong>CORRECT</strong>
+                    <p>Yes! Token Program has ONE program ID but manages ALL tokens.</p>
+                    <pre><div class="diagram">Token Program (ONE ID):
+├─ USDC (10 million accounts)
+├─ Cope (1 million accounts)
+├─ Wrapped Bitcoin (100k accounts)
+└─ NFTs (millions of accounts)</div></pre>
+                </div>
+
+                <h3>❌ "Nonce accounts are like Ethereum nonces?"</h3>
+                <div class="box warning">
+                    <strong>DIFFERENT</strong>
+                    <p>Ethereum nonces are per-account and auto-incrementing. Solana nonces are special accounts.</p>
+                </div>
+
+                <h3>❌ "Programs must be upgradeable?"</h3>
+                <div class="box warning">
+                    <strong>NO CHOICE NEEDED</strong>
+                    <p>You can choose: Upgradeable (BPF Loader Upgradeable) or Immutable (standard deployment)</p>
+                </div>
+
+                <h3>☠️ "My private key was leaked. What happens?"</h3>
+                <div class="box" style="border-left-color: #EF4444;">
+                    <strong>HACKED</strong>
+                    <ul>
+                        <li>Anyone can transfer all SOL</li>
+                        <li>Anyone can transfer all tokens</li>
+                        <li>Anyone can sign any transaction</li>
+                        <li>Anyone can empty everything</li>
+                    </ul>
+                    <strong>Solution:</strong>
+                    <ul>
+                        <li>Create new account immediately</li>
+                        <li>Transfer remaining funds</li>
+                        <li>Never reuse as signing account</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Glossary -->
+            <section id="glossary">
+                <h2>📚 Glossary</h2>
+
+                <table>
+                    <tr>
+                        <th>Term</th>
+                        <th>Definition</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Program</strong></td>
+                        <td>Smart contract code deployed on Solana</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Account</strong></td>
+                        <td>Data container on blockchain (state storage)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lamport</strong></td>
+                        <td>Smallest unit (1 SOL = 1 billion lamports)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOL</strong></td>
+                        <td>Native token of Solana</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SPL</strong></td>
+                        <td>Solana Program Library (custom tokens)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mint</strong></td>
+                        <td>Account defining token (authority, decimals, supply)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Token Account</strong></td>
+                        <td>Account holding tokens (owned by Token Program)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ATA</strong></td>
+                        <td>Associated Token Account (deterministic per user/mint)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PDA</strong></td>
+                        <td>Program Derived Address (no private key)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPI</strong></td>
+                        <td>Cross-Program Invocation (program calling program)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rent</strong></td>
+                        <td>Storage cost for accounts (19.1 lamports/byte/year)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rent Exempt</strong></td>
+                        <td>Account with ≥ 2 years rent (never charged)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nonce</strong></td>
+                        <td>Used for replay protection (blockhash or durable)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Freeze Authority</strong></td>
+                        <td>Can freeze (lock) token accounts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mint Authority</strong></td>
+                        <td>Can create (mint) new tokens</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Top 10 -->
+            <section id="recap">
+                <h2>🎯 Top 10 Things to Remember</h2>
+
+                <h3>1. Programs Don't Store State</h3>
+                <div class="box">
+                    <ul>
+                        <li>Programs are stateless code</li>
+                        <li>State lives in separate accounts</li>
+                        <li>Accounts are passed as parameters</li>
+                    </ul>
+                </div>
+
+                <h3>2. Accounts Are Flexible</h3>
+                <div class="box">
+                    <ul>
+                        <li>Can store any data (bytes)</li>
+                        <li>Token Program interprets as tokens</li>
+                        <li>Your Program interprets as you want</li>
+                    </ul>
+                </div>
+
+                <h3>3. Only Owner Can Modify</h3>
+                <div class="box">
+                    <ul>
+                        <li>Token Program owns USDC accounts</li>
+                        <li>Only Token Program can modify balance</li>
+                        <li>Program follows allowed rules</li>
+                    </ul>
+                </div>
+
+                <h3>4. Fees Are Flat</h3>
+                <div class="box">
+                    <ul>
+                        <li>Always 5000 lamports per transaction</li>
+                        <li>No matter the complexity</li>
+                        <li>Way cheaper than Ethereum gas</li>
+                    </ul>
+                </div>
+
+                <h3>5. Finality is Fast</h3>
+                <div class="box">
+                    <ul>
+                        <li>~6.4 seconds on average</li>
+                        <li>Bitcoin: 10 minutes</li>
+                        <li>Ethereum: 15 seconds</li>
+                    </ul>
+                </div>
+
+                <h3>6. SPL Tokens Need ATA</h3>
+                <div class="box">
+                    <ul>
+                        <li>Each person needs account per token</li>
+                        <li>ATA = deterministic location</li>
+                        <li>Don't need to ask "what's your address?"</li>
+                    </ul>
+                </div>
+
+                <h3>7. CPI is Normal</h3>
+                <div class="box">
+                    <ul>
+                        <li>Programs calling programs is standard</li>
+                        <li>Happens in transactions</li>
+                        <li>Atomic (all or nothing)</li>
+                    </ul>
+                </div>
+
+                <h3>8. Rent is Always Needed</h3>
+                <div class="box">
+                    <ul>
+                        <li>Accounts must pay storage</li>
+                        <li>Rent exempt = 2 years rent balance</li>
+                        <li>Pay once, store forever</li>
+                    </ul>
+                </div>
+
+                <h3>9. Durable Nonce = Delayed Signing</h3>
+                <div class="box">
+                    <ul>
+                        <li>Sign now, submit 1 hour later</li>
+                        <li>No blockhash needed</li>
+                        <li>Costs 5000 lamports for account</li>
+                    </ul>
+                </div>
+
+                <h3>10. Deterministic = Replays Possible</h3>
+                <div class="box">
+                    <ul>
+                        <li>Same input = always same output</li>
+                        <li>Can't replay same transaction</li>
+                        <li>Recent blockhash or nonce prevents it</li>
+                    </ul>
+                </div>
+
+                <h3>Quick Start Checklist</h3>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c1" />
+                        <label for="c1">Understand programs are stateless</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c2" />
+                        <label for="c2">Know accounts store state</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c3" />
+                        <label for="c3">Learn only owner can modify</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c4" />
+                        <label for="c4">Try transferring SOL</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c5" />
+                        <label for="c5">Try transferring SPL token</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c6" />
+                        <label for="c6">Understand ATA derivation</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c7" />
+                        <label for="c7">Learn about CPI</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c8" />
+                        <label for="c8">Deploy a simple program</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c9" />
+                        <label for="c9">Use durable nonce</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="c10" />
+                        <label for="c10">Understand replay protection</label>
+                    </div>
+                </div>
+            </section>
+
+            <div style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    End of Practical Guide | Happy Learning! 🎓
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Update active nav item
+        function updateNav(event) {
+            event.preventDefault();
+            const href = event.currentTarget.getAttribute('href');
+            
+            // Remove active class from all links
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            
+            // Add active class to clicked link
+            event.currentTarget.classList.add('active');
+            
+            // Scroll to section
+            const target = document.querySelector(href);
+            target.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Add active class to nav link based on scroll position
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

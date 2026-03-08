@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Internals - Technical Deep Dive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #14F195;
+            --primary-dark: #11C96B;
+            --secondary: #00D4AA;
+            --dark-bg: #0B1317;
+            --card-bg: #1a2332;
+            --text-primary: #ffffff;
+            --text-secondary: #a8b8c8;
+            --accent: #00D4AA;
+            --border: #2a3a4a;
+            --error: #FF6B6B;
+            --success: #51CF66;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0B1317 0%, #1a2332 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        header {
+            background: linear-gradient(135deg, rgba(20, 241, 149, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%);
+            border-bottom: 2px solid var(--primary);
+            padding: 2rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        nav h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+        }
+
+        nav h3:first-child {
+            margin-top: 0;
+        }
+
+        nav a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover {
+            background: rgba(20, 241, 149, 0.1);
+            color: var(--primary);
+            padding-left: 1.5rem;
+        }
+
+        main {
+            margin-left: 280px;
+            margin-top: 80px;
+        }
+
+        section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            scroll-margin-top: 100px;
+        }
+
+        section h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        section h3 {
+            color: var(--secondary);
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        section h4 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--primary);
+            font-size: 0.9rem;
+        }
+
+        code {
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        pre code {
+            color: #d4d4d4;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, rgba(20, 241, 149, 0.2) 0%, rgba(0, 212, 170, 0.2) 100%);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(20, 241, 149, 0.05);
+        }
+
+        .highlight {
+            background: rgba(20, 241, 149, 0.15);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .highlight strong {
+            color: var(--primary);
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            background: rgba(20, 241, 149, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .comparison-item .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-item .value {
+            color: var(--primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .flow-diagram {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--primary);
+            overflow-x: auto;
+        }
+
+        .key-value {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .key-value strong {
+            color: var(--primary);
+        }
+
+        .security-box {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid var(--error);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .security-box strong {
+            color: var(--error);
+        }
+
+        .success-box {
+            background: rgba(81, 207, 102, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .success-box strong {
+            color: var(--success);
+        }
+
+        footer {
+            background: linear-gradient(135deg, rgba(20, 241, 149, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%);
+            border-top: 2px solid var(--primary);
+            padding: 2rem;
+            text-align: center;
+            margin-left: 280px;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                display: none;
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            section {
+                padding: 1.5rem;
+            }
+
+            footer {
+                margin-left: 0;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .key-value {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h3>📚 Menu</h3>
+        <a href="#crypto">Cryptography</a>
+        <a href="#ed25519">Ed25519</a>
+        <a href="#base58">Base58</a>
+        <a href="#keys-addresses">Keys & Addresses</a>
+        
+        <h3>🔑 Wallets</h3>
+        <a href="#wallets">Wallet Architecture</a>
+        <a href="#seed-phrase">Seed to Keypair</a>
+        <a href="#hd-wallets">HD Wallets</a>
+        <a href="#derivation">Derivation Paths</a>
+        
+        <h3>💾 Accounts</h3>
+        <a href="#account-model">Account Model</a>
+        <a href="#lamports">Lamports & Rent</a>
+        <a href="#ata">Associated Token Accounts</a>
+        <a href="#pda">Program Derived Addresses</a>
+        
+        <h3>📝 Transactions</h3>
+        <a href="#tx-structure">TX Structure</a>
+        <a href="#message">Message & Accounts</a>
+        <a href="#fee-payer">Fee Payer</a>
+        <a href="#signatures">Signatures</a>
+        
+        <h3>⚡ Execution</h3>
+        <a href="#tx-lifecycle">TX Lifecycle</a>
+        <a href="#replay">Replay Protection</a>
+        <a href="#nonce">Durable Nonce</a>
+        
+        <h3>🎯 Validators</h3>
+        <a href="#validators">Validator Setup</a>
+        <a href="#vote-account">Vote Account</a>
+        <a href="#stake-account">Stake Account</a>
+        <a href="#leader-schedule">Leader Schedule</a>
+    </nav>
+
+    <header>
+        <h1>⚙️ Solana Internals</h1>
+        <p>Technical Deep Dive - How Solana Actually Works</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Cryptography Section -->
+            <section id="crypto">
+                <h2>🔐 Cryptography Fundamentals</h2>
+
+                <h3>Understanding Public Key Cryptography</h3>
+                <p><strong>Simple Analogy:</strong> Imagine two boxes with special locks:</p>
+                <ul>
+                    <li>You have a <strong>private key</strong> (secret key to your lock)</li>
+                    <li>You give others your <strong>public key</strong> (the lock itself)</li>
+                    <li>Anyone can lock something with your public key (send you money)</li>
+                    <li>Only you can unlock it (spend money)</li>
+                </ul>
+
+                <h3 id="ed25519">Ed25519: Solana's Signature Scheme</h3>
+                <p><strong>What It Is:</strong> An elliptic curve cryptography algorithm for signing transactions.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>ECDSA (Ethereum)</th>
+                            <th>Ed25519 (Solana)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Signature Size</strong></td>
+                            <td>64-65 bytes</td>
+                            <td>64 bytes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>Slower verification</td>
+                            <td>Faster verification</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Malleability</strong></td>
+                            <td>Potential issues</td>
+                            <td>Immune</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Implementation</strong></td>
+                            <td>Complex</td>
+                            <td>Simpler</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 id="base58">Base58 Encoding</h3>
+                <div class="highlight">
+                    <strong>Why Base58?</strong> Base64 uses confusing characters (0 vs O, l vs I, +, /). Base58 removes them!
+                </div>
+                <pre>Base58 Alphabet:
+123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
+(No 0, O, I, l)</pre>
+
+                <p><strong>Why Solana Uses It:</strong></p>
+                <ul class="checklist">
+                    <li>Human-readable addresses</li>
+                    <li>Less prone to copy-paste errors</li>
+                    <li>Compact representation</li>
+                </ul>
+            </section>
+
+            <!-- Keys and Addresses -->
+            <section id="keys-addresses">
+                <h2>🔑 Private Keys, Public Keys, and Addresses</h2>
+
+                <h3>The Three Tiers</h3>
+                <pre>Tier 1: PRIVATE KEY (Secret!)
+├─ 32 bytes (256 bits)
+├─ Must be kept SECRET
+└─ Used to sign transactions
+
+    ↓ (One-way derivation)
+
+Tier 2: PUBLIC KEY
+├─ 32 bytes derived from private key
+├─ Can be shared publicly
+└─ Used to verify signatures
+
+    ↓ (In Solana = same as address)
+
+Tier 3: ADDRESS
+├─ 32 bytes
+├─ Identified on blockchain
+└─ Base58 encoded for display</pre>
+
+                <h3>Comparison with Ethereum</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Bitcoin</th>
+                            <th>Ethereum</th>
+                            <th>Solana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Private Key</strong></td>
+                            <td>32 bytes</td>
+                            <td>32 bytes</td>
+                            <td>32 bytes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Public Key</strong></td>
+                            <td>Compressed 33B</td>
+                            <td>Uncompressed 64B</td>
+                            <td>32 bytes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Address Derivation</strong></td>
+                            <td>Hash of pubkey</td>
+                            <td>Hash of pubkey</td>
+                            <td>= Public key</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Address Size</strong></td>
+                            <td>20 bytes</td>
+                            <td>20 bytes</td>
+                            <td>32 bytes</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight">
+                    <strong>Why 32 bytes?</strong> Solana's public keys ARE the addresses (no hashing step). Better collision resistance + simpler architecture.
+                </div>
+            </section>
+
+            <!-- Wallet Architecture -->
+            <section id="wallets">
+                <h2>👛 Wallet Architecture</h2>
+
+                <h3 id="seed-phrase">From Seed Phrase to Address: Step-by-Step</h3>
+                <pre>Step 1: SEED PHRASE (12-24 words)
+"abandon ability able about above absent..."
+    ↓ (BIP39 algorithm)
+
+Step 2: MASTER SEED (64 bytes)
+512 bits of binary data
+    ↓ (PBKDF2 derivation)
+
+Step 3: MASTER KEYPAIR
+Derived from master seed
+    ↓ (BIP44 derivation path)
+
+Step 4: ACCOUNT KEYPAIR
+Path: m/44'/501'/0'/0'/0
+These are your signing keys
+    ↓ (Ed25519 public key)
+
+Step 5: ADDRESS (Base58)
+32 bytes encoded for display
+Public key = Address in Solana</pre>
+
+                <h3 id="hd-wallets">HD Wallets and Derivation Paths</h3>
+                <p><strong>What is an HD Wallet?</strong> One seed phrase generates multiple keypairs.</p>
+
+                <h3 id="derivation">BIP44 Standard</h3>
+                <pre>m / purpose' / coin_type' / account' / change / address_index
+
+Examples:
+m/44'/501'/0'/0'/0  = First account, first address
+m/44'/501'/0'/0'/1  = First account, second address
+m/44'/501'/1'/0'/0  = Second account, first address
+
+Details:
+├─ m = Root (master key)
+├─ 44' = BIP44 standard
+├─ 501' = Solana (Bitcoin=0', Ethereum=60')
+├─ 0' = Account number
+├─ 0 = Receiving (1 = change address)
+└─ 0 = Address index</pre>
+
+                <div class="security-box">
+                    <strong>⚠️ Security Note:</strong> The `'` (hardened) means uses private key for derivation. More secure but child cannot be determined without private key.
+                </div>
+            </section>
+
+            <!-- Account Model -->
+            <section id="account-model">
+                <h2>💾 Solana's Account Model</h2>
+
+                <h3>Account Structure</h3>
+                <pre>Account:
+├─ address (32 bytes, public key)
+├─ owner (32 bytes, who controls this)
+├─ lamports (balance)
+├─ data (raw bytes)
+├─ executable (is this a program?)
+└─ rent_epoch (for rent tracking)</pre>
+
+                <p><strong>Key Difference from Ethereum:</strong> Ethereum account IS the entity. In Solana, account is a DATA STRUCTURE with an owner.</p>
+
+                <h3 id="lamports">Lamports and Rent</h3>
+                <div class="key-value">
+                    <strong>1 SOL = </strong>
+                    <span>1,000,000,000 lamports</span>
+                </div>
+                <div class="key-value">
+                    <strong>1 lamport = </strong>
+                    <span>0.000000001 SOL</span>
+                </div>
+
+                <h3>Rent System</h3>
+                <pre>Annual Rent = (account_size) × 19.1 lamports/byte
+
+Example:
+128-byte data = 128 × 19.1 = 2443.2 lamports/year
+
+Rent Exemption:
+└─ Balance ≥ 2 years of rent = never pay rent</pre>
+
+                <p><strong>Who Pays?</strong> Transaction executor pays, usually the account owner or rent payer specified.</p>
+
+                <h3>Ownership and Executability</h3>
+                <div class="card">
+                    <h4>Regular Account</h4>
+                    <ul>
+                        <li>executable = false</li>
+                        <li>owner = State Program</li>
+                        <li>data = User data</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Executable Account (Smart Contract)</h4>
+                    <ul>
+                        <li>executable = true</li>
+                        <li>owner = BPF Loader</li>
+                        <li>data = Compiled program code</li>
+                    </ul>
+                </div>
+
+                <h3 id="ata">Associated Token Accounts (ATA)</h3>
+                <p><strong>The Problem:</strong> Ethereum has one address for all tokens. Solana needs separate accounts per token.</p>
+
+                <div class="card">
+                    <h4>Solution: ATA</h4>
+                    <pre>Derive deterministic address:
+INPUT: owner + token_mint
+└─ SHA256 hash (always same for same inputs)
+OUTPUT: Same address every time
+
+Benefit:
+├─ Don't need to ask "what's your address?"
+├─ Standard location for each token
+└─ Can auto-create if missing</pre>
+                </div>
+
+                <h3 id="pda">Program Derived Addresses (PDA)</h3>
+                <p><strong>What is a PDA?</strong> An address derived from program ID + seeds + bump. <strong>No private key!</strong></p>
+
+                <pre>PDA Generation:
+INPUT: Program ID + seeds + bump
+
+SHA512(
+  "ProgramDerived",
+  program_id,
+  seed_1,
+  seed_2,
+  ...,
+  bump
+)
+
+1. Hash until valid Ed25519 point
+2. Increment bump if not
+3. That's the PDA address</pre>
+
+                <div class="success-box">
+                    <strong>✓ Use Case:</strong> Program vault holding user funds. Only program can control it (no private key to steal).
+                </div>
+            </section>
+
+            <!-- Transactions -->
+            <section id="tx-structure">
+                <h2>📝 Transactions</h2>
+
+                <h3>Transaction Structure</h3>
+                <pre>Solana Transaction:
+│
+├─ Message
+│  ├─ Header
+│  │  ├─ Num required signers
+│  │  ├─ Num readonly signers
+│  │  └─ Num readonly non-signers
+│  │
+│  ├─ Account Addresses (list of all)
+│  ├─ Recent Blockhash (replay protection)
+│  └─ Instructions (list of operations)
+│
+└─ Signatures (list of signatures)</pre>
+
+                <h3 id="message">Message Structure: Account Metas</h3>
+                <pre>For each instruction, specify accounts:
+
+[
+  {
+    address: "TokenkegQfeZyiNwAJsyFbPVwwQQftas5EMQQqJL8Aw",
+    is_signer: false,      // Doesn't need to sign
+    is_writable: false     // Read-only
+  },
+  {
+    address: "9B5X4z6z2MPGEg25zZvzG2jhXwQaE...",
+    is_signer: false,
+    is_writable: true      // Will be modified
+  },
+  {
+    address: "8e74fbE1NHhbw6X9DQ2wE6WbH7NvqvJ2C1VFhcQPg8J2",
+    is_signer: true,       // Must sign
+    is_writable: false
+  }
+]</pre>
+
+                <div class="highlight">
+                    <strong>Why Mark This?</strong> Sealevel uses it for parallel processing. Read-only = parallel safe. Writable = must be sequential.
+                </div>
+
+                <h3 id="fee-payer">Fee Payer</h3>
+                <pre>Transaction includes:
+├─ Payer: First signer
+├─ Fee: 5000 lamports (~0.000005 SOL)
+├─ Deducted from: Payer's lamports
+└─ If insufficient: Transaction fails
+
+Who pays?
+├─ Usually: Transaction creator
+├─ Can be: Different (subsidized TX)
+└─ Example: Company pays for employee TXs</pre>
+
+                <h3 id="signatures">Signatures Using Ed25519</h3>
+                <pre>Signing Process:
+│
+├─ Message (serialized to bytes)
+│  ├─ Account addresses
+│  ├─ Recent blockhash
+│  └─ Instructions
+│
+├─ Per Signer:
+│  ├─ Private key + Message → Ed25519 Sign
+│  └─ Get 64-byte signature
+│
+└─ Add all signatures to transaction</pre>
+
+                <p><strong>Multiple Signatures (Multisig):</strong></p>
+                <pre>Example: 3-of-3 multisig approval
+
+Transaction: "Transfer treasury funds"
+
+Signatures:
+├─ Alice signs (proves authorization)
+├─ Bob signs (proves approval)
+└─ Carol signs (proves approval)
+
+Verification:
+├─ Check all 3 signatures valid
+├─ All valid = transaction proceeds
+└─ Any invalid = transaction fails</pre>
+            </section>
+
+            <!-- Transaction Lifecycle -->
+            <section id="tx-lifecycle">
+                <h2>⚡ Transaction Lifecycle</h2>
+
+                <h3>Step-by-Step Flow</h3>
+                <div class="flow-diagram">Step 1: Create & Sign
+├─ Fetch recent blockhash
+├─ Create message
+└─ Sign with private key
+
+Step 2: Submit to Network
+├─ Send to RPC node
+├─ Validate format/signatures
+└─ Enter mempool
+
+Step 3: Leader Includes Block
+├─ Leader pulls from mempool
+├─ Orders transactions
+├─ Bundles into block
+
+Step 4: Execute (Sealevel)
+├─ Load accounts
+├─ Run program logic
+├─ Modify states atomically
+└─ Revert all if error
+
+Step 5: Broadcast (Turbine)
+├─ Break into pieces
+├─ Spread through network
+└─ Validators receive
+
+Step 6: Validators Vote
+├─ Check signatures valid
+├─ Vote on block (Tower BFT)
+└─ Votes accumulate
+
+Step 7: Finality (~6.4 sec)
+├─ 2/3+ of stake votes
+├─ FINAL (cannot revert)
+└─ ✓ Success</div>
+
+                <h3>State Changes</h3>
+                <pre>Before TX:
+├─ Account A: 1000 lamports, 100 tokens
+└─ Account B: 2000 lamports, 50 tokens
+
+TX: Transfer 20 tokens A→B
+
+After TX (Committed):
+├─ Account A: 995 lamports, 80 tokens (20 sent + 5000 fee)
+└─ Account B: 2000 lamports, 70 tokens (received 20)</pre>
+
+                <div class="success-box">
+                    <strong>✓ Atomicity:</strong> Either ALL changes happen or NONE. Fee always deducted even if TX fails.
+                </div>
+            </section>
+
+            <!-- Replay Protection -->
+            <section id="replay">
+                <h2>🛡️ Replay Protection</h2>
+
+                <h3>The Replay Attack</h3>
+                <pre>Scenario:
+1. Alice sends "Transfer 10 SOL to Bob" (signed)
+2. Attacker hears transaction
+3. Attacker rebroadcasts 1000 times
+4. Bob gets 10,000 SOL instead of 10!</pre>
+
+                <h3>Solution 1: Recent Blockhash (Default)</h3>
+                <pre>Include in TX:
+├─ Recent blockhash (hash of block 100 blocks ago)
+
+Validator checks:
+├─ Is this blockhash still valid?
+├─ Default: Yes, if within 2-3 minutes
+├─ Too old: REJECT (replay!)
+└─ Not recognized: REJECT (different chain?)</pre>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Block Hash</th>
+                            <th>TX Valid?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Slot 1000</td>
+                            <td>0xAABBCC...</td>
+                            <td>✓ Created now</td>
+                        </tr>
+                        <tr>
+                            <td>Slots 1001-1099</td>
+                            <td>Other hashes</td>
+                            <td>✓ Still valid</td>
+                        </tr>
+                        <tr>
+                            <td>Slot 1100</td>
+                            <td>0xAABBCC no longer valid</td>
+                            <td>✗ Too old</td>
+                        </tr>
+                        <tr>
+                            <td>Slot 1101+</td>
+                            <td>-</td>
+                            <td>✗ Outside window</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight">
+                    <strong>Why This Works:</strong> Blockhash expires after 2-3 minutes. Attacker can't replay after that. Must use current blockhash, making it a new transaction.
+                </div>
+
+                <h3 id="nonce">Method 2: Durable Nonce (Advanced)</h3>
+
+                <h3>The Problem</h3>
+                <pre>User signs TX at time T
+TX might submit at time T + 5 minutes
+Recent blockhash now expired!
+TX fails :(</pre>
+
+                <h3>Solution: Nonce Account</h3>
+                <pre>Nonce Account Structure:
+├─ nonce_value (32 bytes, changes each use)
+├─ authority (who can use this)
+└─ fee_calculator
+
+TX Builder:
+├─ Instead of recent_blockhash
+├─ Use nonce_value from Nonce Account
+├─ Can submit anytime!
+
+Each Use:
+├─ Nonce advances to new value
+├─ Old nonce forever invalid
+├─ Prevents replay forever</pre>
+
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <div class="label">Recent Blockhash</div>
+                        <div class="value">2-3 min</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="label">Durable Nonce</div>
+                        <div class="value">∞ (until used)</div>
+                    </div>
+                </div>
+
+                <h3>Who Creates Nonce?</h3>
+                <pre>User creates it:
+├─ Pay rent-exempt balance (~5000 lamports)
+├─ One-time cost
+├─ User is owner
+└─ Can be reused many times
+
+Cost Analysis:
+├─ Recent blockhash: Free
+├─ Durable nonce: 5000 lamports once
+└─ Worth it for: Delayed/scheduled TX</pre>
+            </section>
+
+            <!-- Validators -->
+            <section id="validators">
+                <h2>🎯 Validators and Authority</h2>
+
+                <h3>Validator Architecture</h3>
+                <pre>Validator isn't ONE account, it's SEVERAL:
+
+1. VALIDATOR IDENTITY
+   ├─ Purpose: Identify validator
+   ├─ Used for: Signing blocks
+   └─ Risk: High (if leaked = attacks possible)
+
+2. VOTE ACCOUNT
+   ├─ Purpose: Store voting records
+   ├─ Owner: Vote Program
+   └─ Update: When voting
+
+3. STAKE ACCOUNT
+   ├─ Purpose: Hold staked SOL
+   ├─ Owner: Stake Program
+   └─ Associated: With validator
+
+4. COMMISSION ACCOUNT
+   ├─ Purpose: Collect fees
+   ├─ Owner: Validator
+   └─ Receives: Validator's share</pre>
+
+                <h3>Authority Types (Different Keys!)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Authority</th>
+                            <th>Type</th>
+                            <th>Function</th>
+                            <th>Risk Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Validator Identity</strong></td>
+                            <td>Keypair</td>
+                            <td>Signs blocks</td>
+                            <td>CRITICAL</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vote Authority</strong></td>
+                            <td>Address</td>
+                            <td>Modify vote account</td>
+                            <td>High</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stake Authority</strong></td>
+                            <td>Address</td>
+                            <td>Add/remove stake</td>
+                            <td>Medium</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Withdraw Authority</strong></td>
+                            <td>Address</td>
+                            <td>Withdraw SOL</td>
+                            <td>Medium</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight">
+                    <strong>⚡ Can Be Different People!</strong> Corporate validator can have operator (validator identity) + CFO (withdraw authority) + board (vote authority).
+                </div>
+
+                <h3 id="vote-account">Vote Account</h3>
+                <pre>Vote Account Data:
+├─ node_pubkey (validator ID)
+├─ authorized_voters (list of who can vote)
+├─ authorized_withdrawer (who can withdraw)
+├─ commission (0-100%)
+├─ votes (last 40-50 recent votes)
+├─ root_slot (most recent finalized)
+└─ prior_voters (history)</pre>
+
+                <p><strong>Who Votes?</strong> Validator's software signs blocks, calls Vote Program, updates vote account.</p>
+
+                <h3 id="stake-account">Stake Account</h3>
+                <pre>Stake Account Data:
+├─ delegation
+│  ├─ voter_pubkey (validator's vote account)
+│  ├─ stake (amount staked)
+│  └─ activation_epoch (when started)
+├─ authorized
+│  ├─ staker (can add/remove stake)
+│  └─ withdrawer (can withdraw)
+├─ lockup
+│  ├─ custodian (can change during lockup)
+│  ├─ epoch (when lockup ends)
+│  └─ unix_timestamp (when lockup ends)
+└─ rent_exempt_reserve (minimum balance)</pre>
+
+                <h3>Staking Process</h3>
+                <pre>Step 1: Create Stake Account
+├─ Allocate new account
+└─ Fund with SOL
+
+Step 2: Activate Stake
+├─ Specify validator
+└─ Activation epoch = current + delay
+
+Step 3: Earn Rewards
+├─ Every epoch: rewards calculated
+├─ Based on: validator performance
+└─ Typically: 3-8% annually
+
+Step 4: Inactivate
+├─ Inactivation epoch = current + 1
+└─ Can't withdraw until then
+
+Step 5: Withdraw
+├─ Remove SOL to preferred account
+└─ Requires: withdrawer authority</pre>
+
+                <div class="card">
+                    <h4>Commission Example</h4>
+                    <pre>You have 100 SOL staked
+Validator commission: 5%
+Validator earns 10% yield
+
+Your rewards:
+100 × 10% × 0.95 = 9.5 SOL
+
+Validator's commission:
+100 × 10% × 0.05 = 0.5 SOL</pre>
+                </div>
+
+                <h3 id="leader-schedule">Leader Schedule</h3>
+                <p><strong>What:</strong> Predetermined list of which validator leads each slot.</p>
+
+                <pre>Example (simplified):
+Slot 1000: Validator A leads
+Slot 1001: Validator B leads
+Slot 1002: Validator C leads
+Slot 1003: Validator A leads
+...
+(432,000 slots per epoch)</pre>
+
+                <h3>How It's Determined</h3>
+                <pre>Before each epoch:
+├─ List all active validators
+├─ Sort by stake (more stake = more slots)
+├─ Use pseudorandom algorithm
+├─ Result: deterministic but unpredictable
+
+Probability:
+Validator i = (stake_i / total_stake) × 100%
+
+Example:
+├─ Validator A: 100k SOL = 57% slots
+├─ Validator B: 50k SOL = 29% slots
+└─ Validator C: 25k SOL = 14% slots</pre>
+
+                <div class="success-box">
+                    <strong>✓ Benefits:</strong> Everyone knows schedule in advance. Prevents "leader bribery". Validators can prepare blocks early via Gulf Stream.
+                </div>
+            </section>
+
+            <!-- Summary -->
+            <section>
+                <h2>📊 Quick Summary Table</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Concept</th>
+                            <th>Size</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Private Key</strong></td>
+                            <td>32 bytes</td>
+                            <td>Secret signing key (never share!)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Public Key</strong></td>
+                            <td>32 bytes</td>
+                            <td>Verify signatures (public)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Address</strong></td>
+                            <td>32 bytes</td>
+                            <td>Account identifier (Base58)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ed25519 Signature</strong></td>
+                            <td>64 bytes</td>
+                            <td>Proof of authorization</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lamport</strong></td>
+                            <td>-</td>
+                            <td>1 SOL = 1 billion</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Account</strong></td>
+                            <td>Variable</td>
+                            <td>On-chain data storage</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PDA</strong></td>
+                            <td>32 bytes</td>
+                            <td>No private key address</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Recent Blockhash</strong></td>
+                            <td>32 bytes</td>
+                            <td>Replay protection (2-3 min)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nonce</strong></td>
+                            <td>32 bytes</td>
+                            <td>Durable replay protection</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p><strong>Solana Internals</strong> — Deep technical guide to how Solana works</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">⚙️ Blockchain-KT Project | Last Updated: 2026</p>
+    </footer>
+
+    <script>
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.style.color = 'var(--text-secondary)';
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.style.color = 'var(--primary)';
+                    link.style.background = 'rgba(20, 241, 149, 0.1)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

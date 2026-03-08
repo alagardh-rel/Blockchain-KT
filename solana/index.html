@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana for Beginners - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #14F195;
+            --primary-dark: #11C96B;
+            --secondary: #00D4AA;
+            --dark-bg: #0B1317;
+            --card-bg: #1a2332;
+            --text-primary: #ffffff;
+            --text-secondary: #a8b8c8;
+            --accent: #00D4AA;
+            --border: #2a3a4a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0B1317 0%, #1a2332 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, rgba(20, 241, 149, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%);
+            border-bottom: 2px solid var(--primary);
+            padding: 2rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Navigation Sidebar */
+        nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        nav h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+        }
+
+        nav h3:first-child {
+            margin-top: 0;
+        }
+
+        nav a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover {
+            background: rgba(20, 241, 149, 0.1);
+            color: var(--primary);
+            padding-left: 1.5rem;
+        }
+
+        /* Main Content */
+        main {
+            margin-left: 280px;
+            margin-top: 80px;
+        }
+
+        /* Sections */
+        section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            scroll-margin-top: 100px;
+        }
+
+        section h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        section h3 {
+            color: var(--secondary);
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        section h4 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Paragraphs */
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code blocks */
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--primary);
+        }
+
+        code {
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        pre code {
+            color: #d4d4d4;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, rgba(20, 241, 149, 0.2) 0%, rgba(0, 212, 170, 0.2) 100%);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(20, 241, 149, 0.05);
+        }
+
+        /* Highlights */
+        .highlight {
+            background: rgba(20, 241, 149, 0.15);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .highlight strong {
+            color: var(--primary);
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(calc(50% - 1rem), 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            background: rgba(20, 241, 149, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Comparison Section */
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .comparison-item .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-item .value {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Glossary */
+        .glossary-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .glossary-item strong {
+            color: var(--primary);
+            font-size: 1.05rem;
+        }
+
+        .glossary-item p {
+            margin-bottom: 0;
+            margin-top: 0.25rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--card-bg);
+        }
+
+        /* Checkmarks */
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, rgba(20, 241, 149, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%);
+            border-top: 2px solid var(--primary);
+            padding: 2rem;
+            text-align: center;
+            margin-left: 280px;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            nav {
+                display: none;
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            section {
+                padding: 1.5rem;
+            }
+
+            section h2 {
+                font-size: 1.5rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            footer {
+                margin-left: 0;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Utility Classes */
+        .mt-2 { margin-top: 2rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        .text-center { text-align: center; }
+        .icon { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="sidebar">
+        <h3>📚 Menu</h3>
+        <a href="#what-is-solana">What is Solana?</a>
+        <a href="#why-created">Why Was It Created?</a>
+        <a href="#differences">How It Differs</a>
+        
+        <h3>🔑 Key Concepts</h3>
+        <a href="#concepts">Key Concepts</a>
+        <a href="#node">Node</a>
+        <a href="#validator">Validator</a>
+        <a href="#leader">Leader</a>
+        <a href="#slot">Slot</a>
+        <a href="#epoch">Epoch</a>
+        <a href="#finality">Finality</a>
+        
+        <h3>⚙️ Technology</h3>
+        <a href="#proof-history">Proof of History</a>
+        <a href="#proof-stake">Proof of Stake</a>
+        
+        <h3>🏗️ Architecture</h3>
+        <a href="#architecture">Architecture Overview</a>
+        <a href="#gulf-stream">Gulf Stream</a>
+        <a href="#turbine">Turbine</a>
+        <a href="#sealevel">Sealevel</a>
+        <a href="#tower-bft">Tower BFT</a>
+        <a href="#tx-journey">Transaction Journey</a>
+        
+        <h3>📖 Reference</h3>
+        <a href="#quick-ref">Quick Reference</a>
+        <a href="#glossary">Glossary</a>
+    </nav>
+
+    <!-- Header -->
+    <header>
+        <h1>🚀 Solana for Beginners</h1>
+        <p>A Complete Guide in Simple English</p>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <!-- What is Solana -->
+            <section id="what-is-solana">
+                <h2>🌍 What is Solana?</h2>
+                
+                <h3>Layman's Explanation</h3>
+                <p>Imagine a bank that processes transactions for millions of people. The bank needs to keep track of who has how much money, verify that transactions are real, and make sure nobody cheats the system.</p>
+                
+                <div class="highlight">
+                    <strong>Solana is a global, decentralized bank</strong> that lives on computers all over the world instead of in one building. Nobody owns it, but thousands of computers (called nodes) work together to:
+                    <ul style="margin-top: 1rem;">
+                        <li>Keep track of who owns what</li>
+                        <li>Verify that transactions are real</li>
+                        <li>Process transactions very quickly</li>
+                        <li>Prevent fraud</li>
+                    </ul>
+                </div>
+
+                <p><strong>Think of Solana as a super-fast, transparent ledger</strong> that everyone can see and verify, but nobody can control or fake.</p>
+
+                <h3>Technical Explanation</h3>
+                <p><strong>Solana is a Layer 1 blockchain</strong> - a distributed ledger technology that uses cryptographic proof and consensus mechanisms to validate transactions without requiring a central authority.</p>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>Native Token</h4>
+                        <p>SOL</p>
+                    </div>
+                    <div class="card">
+                        <h4>Launch Date</h4>
+                        <p>March 2020</p>
+                    </div>
+                    <div class="card">
+                        <h4>Consensus</h4>
+                        <p>Proof of Stake</p>
+                    </div>
+                    <div class="card">
+                        <h4>Finality</h4>
+                        <p>~6.4 seconds</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Why Created -->
+            <section id="why-created">
+                <h2>❓ Why Was Solana Created?</h2>
+                
+                <h3>The Problem (2019-2020)</h3>
+                <p>Two major issues plagued blockchain:</p>
+                
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <div class="label">Bitcoin Speed</div>
+                        <div class="value">~7 tps</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="label">Ethereum Speed</div>
+                        <div class="value">~15 tps</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="label">Visa Speed</div>
+                        <div class="value">~65,000 tps</div>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>🎭 Concert Analogy:</strong> Instead of everyone lining up at one counter (Bitcoin/Ethereum), Solana opened thousands of ticket counters working simultaneously - fast, cheap!
+                </div>
+
+                <h3>The Solana Solution</h3>
+                <p><strong>Anatoly Yakovenko</strong> invented <strong>Proof of History</strong> that lets Solana:</p>
+                <ul>
+                    <li>Order transactions using time instead of network consensus</li>
+                    <li>Process thousands of transactions in parallel</li>
+                    <li>Achieve massive throughput while staying secure</li>
+                    <li>Keep transaction fees extremely low (~$0.00000325)</li>
+                </ul>
+            </section>
+
+            <!-- Differences -->
+            <section id="differences">
+                <h2>⚖️ How Solana Differs from Bitcoin and Ethereum</h2>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Bitcoin</th>
+                                <th>Ethereum</th>
+                                <th>Solana</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Purpose</strong></td>
+                                <td>Digital money</td>
+                                <td>Smart contracts</td>
+                                <td>High-speed apps</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Launch</strong></td>
+                                <td>2009</td>
+                                <td>2015</td>
+                                <td>2020</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Transactions/sec</strong></td>
+                                <td>~7</td>
+                                <td>~15</td>
+                                <td>400-1000+</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Avg Fee</strong></td>
+                                <td>$0.50-$5</td>
+                                <td>$2-$100</td>
+                                <td>$0.000003</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Energy Use</strong></td>
+                                <td>Massive</td>
+                                <td>Medium</td>
+                                <td>Low</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Finality</strong></td>
+                                <td>~10 min</td>
+                                <td>~15 sec</td>
+                                <td>~6.4 sec</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Key Concepts -->
+            <section id="concepts">
+                <h2>🔑 Key Concepts Explained</h2>
+
+                <h3 id="node">1. Node 📱</h3>
+                <p><strong>Layman's Definition:</strong> A Node is a computer that stores a complete copy of the blockchain and verifies transactions. Like a bank branch with complete transaction records.</p>
+                <p><strong>Technical Definition:</strong> A full node maintains the complete ledger state, full transaction history, and proof data.</p>
+
+                <h3 id="validator">2. Validator ✓</h3>
+                <p><strong>Layman's Definition:</strong> A Validator is a special node chosen to create new blocks and earn rewards. Like trusted cashiers—but any can be replaced if they cheat.</p>
+                <p><strong>Technical Definition:</strong> Validators run Solana software with special configuration, stake SOL tokens as collateral, create blocks, and earn transaction fees.</p>
+
+                <h3 id="leader">3. Leader 👑</h3>
+                <p><strong>Layman's Definition:</strong> At any moment, one validator is the "Leader"—responsible for collecting transactions and creating the next block. Like the current speaker at a meeting.</p>
+
+                <h3 id="slot">4. Slot ⏱️</h3>
+                <div class="highlight">
+                    <strong>Duration:</strong> ~400 milliseconds (less than half a second)
+                </div>
+                <p>Each slot, one validator becomes leader and creates one block.</p>
+                <pre>Slot 100: Validator A is leader → creates block 100
+Slot 101: Validator B is leader → creates block 101
+Slot 102: Validator C is leader → creates block 102
+(continues...)</pre>
+
+                <h3 id="epoch">5. Epoch 📅</h3>
+                <p><strong>Layman's Definition:</strong> An Epoch is a longer time period of many slots—like a week made of many days.</p>
+                <div class="card">
+                    <h4>Epoch Details</h4>
+                    <ul>
+                        <li><strong>Duration:</strong> 432,000 slots ≈ 2 days</li>
+                        <li><strong>Validator set:</strong> Fixed during epoch</li>
+                        <li><strong>Stake changes:</strong> Take effect next epoch</li>
+                        <li><strong>Inflation rewards:</strong> Calculated per epoch</li>
+                    </ul>
+                </div>
+
+                <h3 id="finality">6. Finality 🔒</h3>
+                <p><strong>Layman's Definition:</strong> Finality means "we're certain nobody can take back this transaction."</p>
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <div class="label">Bitcoin</div>
+                        <div class="value">~10 min</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="label">Ethereum</div>
+                        <div class="value">~15 sec</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="label">Solana</div>
+                        <div class="value">~6.4 sec</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Proof of History -->
+            <section id="proof-history">
+                <h2>⏰ Proof of History</h2>
+
+                <h3>The Problem It Solves</h3>
+                <p><strong>Without timestamps:</strong> How do validators agree on the ORDER of transactions? What if they disagree?</p>
+
+                <div class="highlight">
+                    <strong>Solution:</strong> Proof of History proves what happened WHEN without asking anyone else!
+                </div>
+
+                <h3>Layman's Explanation</h3>
+                <p><strong>Like a tamper-proof journal:</strong></p>
+                <ol>
+                    <li>Alice writes an entry: "I bought coffee for $5 at 9:00 AM"</li>
+                    <li>She puts a unique seal on it (like a wax seal)</li>
+                    <li>Bob writes next and references Alice's seal</li>
+                    <li>Bob's entry gets a new unique seal</li>
+                    <li>Eva writes next and references Bob's seal</li>
+                </ol>
+                <p><strong>Result:</strong> The ORDER is mathematically proven. No voting needed. No delays.</p>
+
+                <h3>Technical Explanation</h3>
+                <pre>State_0: random value
+SHA256(State_0) → Hash_1
+SHA256(Hash_1) → Hash_2
+SHA256(Hash_2) → Hash_3
+...</pre>
+
+                <p><strong>Key properties:</strong></p>
+                <ul>
+                    <li><strong>Sequential:</strong> Each hash depends on previous (cannot parallel)</li>
+                    <li><strong>Provable:</strong> Anyone can verify in ~1 microsecond</li>
+                    <li><strong>Deterministic:</strong> Same input always produces same output</li>
+                    <li><strong>Timestamp built-in:</strong> The index proves how much time passed</li>
+                </ul>
+
+                <h3>Why It's Revolutionary</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Challenge</th>
+                                <th>Without PoH</th>
+                                <th>With PoH</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Order determination</strong></td>
+                                <td>Validators vote (slow)</td>
+                                <td>Mathematically proven (instant)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Coordination</strong></td>
+                                <td>Yes (expensive)</td>
+                                <td>No (cheap)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Parallel processing</strong></td>
+                                <td>Hard (must wait)</td>
+                                <td>Easy (order known)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scalability</strong></td>
+                                <td>Limited</td>
+                                <td>Massive</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Proof of Stake -->
+            <section id="proof-stake">
+                <h2>💰 Proof of Stake</h2>
+
+                <h3>Why Not Proof of Work?</h3>
+                <p><strong>Proof of Work (Bitcoin):</strong> Miners solve hard puzzles. Uses massive electricity. Secure but slow and expensive.</p>
+                <p><strong>Proof of Stake (Solana):</strong> Validators put up collateral. Honest behavior = rewards. Dishonest = lose stake.</p>
+
+                <div class="highlight">
+                    <strong>🏦 Escrow Analogy:</strong> Like a security deposit—if you have $1M staked and lie, you lose it. Cheaper to be honest!
+                </div>
+
+                <h3>How It Works</h3>
+                <ol>
+                    <li><strong>Setup:</strong> Validators deposit SOL (security deposit)</li>
+                    <li><strong>Behavior:</strong> Validators follow rules, participate in consensus</li>
+                    <li><strong>Rewards:</strong> Honest validators earn transaction fees + rewards</li>
+                    <li><strong>Punishment:</strong> Dishonest validators lose stake (slashing)</li>
+                </ol>
+
+                <h3>Stake Delegation</h3>
+                <p><strong>Not everyone wants to run a validator.</strong> You can delegate your SOL:</p>
+                <div class="card">
+                    <strong>Example:</strong>
+                    <ul style="margin-top: 1rem;">
+                        <li>You have 100 SOL</li>
+                        <li>Delegate to Validator X (5% commission)</li>
+                        <li>Validator earns 10% yield</li>
+                        <li>You get: 100 × 10% × 0.95 = 9.5 SOL</li>
+                        <li>Validator gets: 0.5 SOL commission</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Architecture -->
+            <section id="architecture">
+                <h2>🏗️ Solana Architecture</h2>
+
+                <h3>Overview: The Solana Stack</h3>
+                <pre>┌────────────────────────────────────────┐
+│ Applications (dApps, wallets, games)   │
+└────────────────────────────────────────┘
+                    ↓
+┌────────────────────────────────────────┐
+│ Users submit transactions               │
+└────────────────────────────────────────┘
+                    ↓
+         ┌──────────────────────┐
+         │ Solana Network       │
+         │ (many validators)    │
+         └──────────────────────┘
+                    ↓
+    ┌────────┬──────────┬────────┬────────┐
+    ↓        ↓          ↓        ↓
+ Gulf    Turbine  Sealevel  Tower BFT
+Stream (broadcast) (parallel) (consensus)</pre>
+
+                <h3 id="gulf-stream">Gulf Stream (Mempool) 💨</h3>
+                <p><strong>What:</strong> A waiting room for transactions before processing.</p>
+                <div class="highlight">
+                    <strong>💡 Innovation:</strong> Forward transactions to next leaders early. By the time they become leader, your transaction is ready!
+                </div>
+
+                <h3 id="turbine">Turbine (Broadcast) 📡</h3>
+                <p><strong>What:</strong> How new blocks spread through the network quickly.</p>
+                <p><strong>How:</strong> Blocks broken into pieces (like Netflix streaming). Spread in layers through validators.</p>
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <div class="label">Old Way</div>
+                        <div class="value">200-400ms</div>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="label">With Turbine</div>
+                        <div class="value">50-100ms</div>
+                    </div>
+                </div>
+
+                <h3 id="sealevel">Sealevel (Runtime) ⚡</h3>
+                <p><strong>What:</strong> The engine that processes transactions in parallel.</p>
+                <p><strong>Analogy:</strong> Multiple cashiers handling different transactions simultaneously instead of one person doing everything.</p>
+                <pre>Transaction A: Alice pays Bob (touches: Alice, Bob)
+Transaction B: Eva pays Diana (touches: Eva, Diana)
+Transaction C: Charlie pays Bob (touches: Charlie, Bob)
+
+Result:
+- A and B: No overlap → Run in parallel ✓
+- A and C: Both touch Bob → Cannot parallel
+- B and C: No overlap → Run in parallel ✓
+
+Execution: ~2x faster!</pre>
+
+                <h3 id="tower-bft">Tower BFT (Consensus) 🗳️</h3>
+                <p><strong>What:</strong> The voting system validators use to agree on blocks.</p>
+                <p><strong>Byzantine Fault Tolerance:</strong> Network has up to 33% bad actors. Still reaches agreement on truth. Requires 2/3+ validators voting.</p>
+
+                <div class="card">
+                    <strong>How Voting Works:</strong>
+                    <ol style="margin-top: 1rem;">
+                        <li>Leader creates block</li>
+                        <li>Validators vote on block</li>
+                        <li>Voting progresses through "towers"</li>
+                        <li>Deep votes = locked in</li>
+                        <li>2/3+ of stake deepens vote = Finality</li>
+                    </ol>
+                </div>
+
+                <h3 id="tx-journey">A Transaction's Journey 🚀</h3>
+                <div class="timeline">
+                    <div class="timeline-item">User creates transaction</div>
+                    <div class="timeline-item">Gulf Stream picks it up</div>
+                    <div class="timeline-item">Forwards to next leader's queue</div>
+                    <div class="timeline-item">Turbine spreads through network</div>
+                    <div class="timeline-item">Leader's slot arrives</div>
+                    <div class="timeline-item">Sealevel processes (parallel)</div>
+                    <div class="timeline-item">Block created with transaction</div>
+                    <div class="timeline-item">Validators vote (Tower BFT)</div>
+                    <div class="timeline-item">After ~6.4 seconds: Finality ✓</div>
+                </div>
+
+                <h3>Why Solana is Fast</h3>
+                <div class="highlight">
+                    <strong>Combination of innovations:</strong>
+                    <ul style="margin-top: 1rem;">
+                        <li>✓ Proof of History → No wait for ordering</li>
+                        <li>✓ Gulf Stream → Pipelined to future leaders</li>
+                        <li>✓ Turbine → Fast block propagation</li>
+                        <li>✓ Sealevel → Parallel processing</li>
+                        <li>✓ Tower BFT → Efficient voting</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Quick Reference -->
+            <section id="quick-ref">
+                <h2>📊 Quick Reference</h2>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Bitcoin</th>
+                                <th>Ethereum</th>
+                                <th>Solana</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Max Throughput</strong></td>
+                                <td>~7 tps</td>
+                                <td>~15 tps</td>
+                                <td>400-1000 tps</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Average Fee</strong></td>
+                                <td>$0.50-5</td>
+                                <td>$2-100</td>
+                                <td>$0.000003</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Finality</strong></td>
+                                <td>~10 min</td>
+                                <td>~15 sec</td>
+                                <td>~6.4 sec</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Smart Contracts</strong></td>
+                                <td>Limited</td>
+                                <td>Yes (EVM)</td>
+                                <td>Yes (Rust)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Energy Use</strong></td>
+                                <td>Massive</td>
+                                <td>Low</td>
+                                <td>Very Low</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Glossary -->
+            <section id="glossary">
+                <h2>📖 Glossary</h2>
+                
+                <div class="glossary-item">
+                    <strong>Validator</strong>
+                    <p>Node that creates blocks and earns rewards by validating transactions</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Node</strong>
+                    <p>Computer that stores blockchain and verifies transactions</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Leader</strong>
+                    <p>Validator creating the current block</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Slot</strong>
+                    <p>400ms time unit; one block created per slot</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Epoch</strong>
+                    <p>432,000 slots (~2 days); validator set fixed during epoch</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Finality</strong>
+                    <p>Point where transaction cannot be reversed</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>SOL</strong>
+                    <p>Solana's native token/currency</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Lamport</strong>
+                    <p>Smallest unit (1 SOL = 1 billion lamports)</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Stake</strong>
+                    <p>SOL locked up by validators as collateral</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Slashing</strong>
+                    <p>Punishment for misbehavior (losing stake)</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Mempool</strong>
+                    <p>Buffer of pending transactions waiting to be processed</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>Smart Contract</strong>
+                    <p>Program deployed on blockchain that executes automatically</p>
+                </div>
+
+                <div class="glossary-item">
+                    <strong>dApp</strong>
+                    <p>Decentralized application built on blockchain</p>
+                </div>
+            </section>
+
+            <!-- Takeaways -->
+            <section class="mt-2">
+                <h2>✅ Key Takeaways</h2>
+                <ul class="checklist">
+                    <li>Solana is a high-speed, low-cost blockchain</li>
+                    <li>Invented to fix Bitcoin/Ethereum's speed limits</li>
+                    <li>Uses Proof of History + Proof of Stake + parallel processing</li>
+                    <li>Processes 400-1000 tps vs 7-15 for Bitcoin/Ethereum</li>
+                    <li>Average transaction cost is $0.000003</li>
+                    <li>Architecture: Gulf Stream → Turbine → Sealevel → Tower BFT</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Solana for Beginners</strong> — A comprehensive guide to understanding Solana blockchain</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">📚 Blockchain-KT Project | Last Updated: 2026</p>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Highlight active section in sidebar
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.style.color = 'var(--text-secondary)';
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.style.color = 'var(--primary)';
+                    link.style.background = 'rgba(20, 241, 149, 0.1)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
